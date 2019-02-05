@@ -128,7 +128,34 @@ class KnowledgeBase(object):
         printv("Retracting {!r}", 0, verbose, [fact])
         ####################################################
         # Student code goes here
-        
+        if fact not in self.facts:  # ignore if fact to be retracted is not in kb
+            return
+        fact = self._get_fact(fact)  # make sure you have kb's fact
+
+        # Don't remove if supported
+        if fact.supported_by:
+            if fact.asserted:
+                fact.asserted = False  # unassert asserted facts as specified on Piazza
+            return
+
+        for otherFact in fact.supports_facts:
+            print("other fact")
+            print(otherFact)
+            for factRule in otherFact.supported_by:
+                if fact in factRule:
+                    otherFact.supported_by.remove(factRule)
+            # otherFact.supported_by = otherFact.supported_by.remove(fact)
+            if len(otherFact.supported_by) == 0:
+                self.kb_retract(otherFact)
+        for rule in fact.supports_rules:
+            for factRule in rule.supported_by:
+                if fact in factRule:
+                    rule.supported_by.remove(factRule)
+            # rule.supported_by = rule.supported_by.remove(fact)
+            if len(rule.supported_by) == 0:
+                self.kb_retract(rule)
+        self.facts.remove(fact)
+
 
 class InferenceEngine(object):
     def fc_infer(self, fact, rule, kb):
@@ -146,3 +173,22 @@ class InferenceEngine(object):
             [fact.statement, rule.lhs, rule.rhs])
         ####################################################
         # Student code goes here
+        if len(rule.lhs) > 0:
+            # check if first element of LHS matches
+            if match(rule.lhs[0], fact.statement):
+                # If there are multiple elements to the LHS, create a new rule
+                if len(rule.lhs) > 1:
+                    builtLHS = []
+                    for i in range(1, len(rule.lhs)):  # ignoring the first element, build the rest of the LHS
+                        builtLHS.append(instantiate(rule.lhs[i], match(fact.statement, rule.lhs[0])))
+                    builtRHS = instantiate(rule.rhs, match(rule.lhs[0], fact.statement))
+                    addedRule = Rule(rule=[builtLHS, builtRHS], supported_by=[[fact, rule]])
+                    fact.supports_rules.append(addedRule)
+                    rule.supports_rules.append(addedRule)
+                    kb.kb_add(addedRule)
+            # If there's only one element, create a new fact
+                else:
+                    addedFact = Fact(statement=instantiate(rule.rhs, match(fact.statement, rule.lhs[0])), supported_by=[[fact, rule]])
+                    fact.supports_facts.append(addedFact)
+                    rule.supports_facts.append(addedFact)
+                    kb.kb_add(addedFact)
