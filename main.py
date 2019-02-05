@@ -92,6 +92,8 @@ class KBTest(unittest.TestCase):
         ask2 = read.parse_input("fact: (resembles profHammond ?Y)")
         print(' Asking if', ask2)
         answer = self.KB.kb_ask(ask2)
+        print("answer")
+        print(answer)
         self.assertFalse(answer)
 
     def test7(self):

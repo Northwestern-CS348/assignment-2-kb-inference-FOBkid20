@@ -128,6 +128,9 @@ class KnowledgeBase(object):
         printv("Retracting {!r}", 0, verbose, [fact])
         ####################################################
         # Student code goes here
+        if not isinstance(fact, Fact):  # ignore retractions that are not facts as specified on Piazza
+            return
+
         if fact not in self.facts:  # ignore if fact to be retracted is not in kb
             return
         fact = self._get_fact(fact)  # make sure you have kb's fact
@@ -139,8 +142,6 @@ class KnowledgeBase(object):
             return
 
         for otherFact in fact.supports_facts:
-            print("other fact")
-            print(otherFact)
             for factRule in otherFact.supported_by:
                 if fact in factRule:
                     otherFact.supported_by.remove(factRule)
@@ -153,9 +154,51 @@ class KnowledgeBase(object):
                     rule.supported_by.remove(factRule)
             # rule.supported_by = rule.supported_by.remove(fact)
             if len(rule.supported_by) == 0:
-                self.kb_retract(rule)
+                self.kb_retract_rule(rule)
         self.facts.remove(fact)
 
+
+    def kb_retract_rule(self, rule):
+        """Retract a fact from the KB
+
+        Args:
+            fact (Fact) - Fact to be retracted
+
+        Returns:
+            None
+        """
+        printv("Retracting {!r}", 0, verbose, [rule])
+        ####################################################
+        # Student code goes here
+        if not isinstance(rule, Rule):  # ignore retractions that are not facts as specified on Piazza
+            return
+
+        if rule not in self.rules:  # ignore if fact to be retracted is not in kb
+            return
+        rule = self._get_rule(rule)  # make sure you have kb's fact
+
+        # Don't remove if supported
+        if rule.supported_by:
+            return
+        # Don't remove if asserted
+        if rule.asserted:
+            return
+
+        for otherFact in rule.supports_facts:
+            for factRule in otherFact.supported_by:
+                if rule in factRule:
+                    otherFact.supported_by.remove(factRule)
+            # otherFact.supported_by = otherFact.supported_by.remove(fact)
+            if len(otherFact.supported_by) == 0:
+                self.kb_retract(otherFact)
+        for otherRule in rule.supports_rules:
+            for factRule in otherRule.supported_by:
+                if rule in factRule:
+                    otherRule.supported_by.remove(factRule)
+            # rule.supported_by = rule.supported_by.remove(fact)
+            if len(otherRule.supported_by) == 0:
+                self.kb_retract_rule(otherRule)
+        self.rules.remove(rule)
 
 class InferenceEngine(object):
     def fc_infer(self, fact, rule, kb):
