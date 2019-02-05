@@ -128,6 +128,8 @@ class KBTest(unittest.TestCase):
         ask1 = read.parse_input("fact: (isliterally ?X TonyStark)")
         print(' Asking if', ask1)
         answer = self.KB.kb_ask(ask1)
+        print("answer")
+        print(answer.list_of_bindings)
         self.assertFalse(answer)
         ask2 = read.parse_input("fact: (IronMan ?X)")
         print(' Asking if', ask2)

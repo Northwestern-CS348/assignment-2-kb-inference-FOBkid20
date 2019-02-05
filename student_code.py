@@ -147,7 +147,8 @@ class KnowledgeBase(object):
                     otherFact.supported_by.remove(factRule)
             # otherFact.supported_by = otherFact.supported_by.remove(fact)
             if len(otherFact.supported_by) == 0:
-                self.kb_retract(otherFact)
+                if not otherFact.asserted:
+                    self.kb_retract(otherFact)
         for rule in fact.supports_rules:
             for factRule in rule.supported_by:
                 if fact in factRule:
@@ -157,12 +158,11 @@ class KnowledgeBase(object):
                 self.kb_retract_rule(rule)
         self.facts.remove(fact)
 
-
     def kb_retract_rule(self, rule):
         """Retract a fact from the KB
 
         Args:
-            fact (Fact) - Fact to be retracted
+            rule (Rule) - Rule to be retracted
 
         Returns:
             None
@@ -170,12 +170,12 @@ class KnowledgeBase(object):
         printv("Retracting {!r}", 0, verbose, [rule])
         ####################################################
         # Student code goes here
-        if not isinstance(rule, Rule):  # ignore retractions that are not facts as specified on Piazza
+        if not isinstance(rule, Rule):  # ignore retractions that are not rules
             return
 
-        if rule not in self.rules:  # ignore if fact to be retracted is not in kb
+        if rule not in self.rules:  # ignore if rule to be retracted is not in kb
             return
-        rule = self._get_rule(rule)  # make sure you have kb's fact
+        rule = self._get_rule(rule)  # make sure you have kb's rule
 
         # Don't remove if supported
         if rule.supported_by:
