@@ -1,0 +1,12 @@
+TESTS WITH ERRORS 
+test13 (gradingtests.UnitTests)
+Traceback (most recent call last):
+  File "/Users/k2i/academics/automatedgradingapp/app/testing/kb-inference/gradingtests.py", line 373, in test13
+    self.assertTrue(str(answer1[0]).startswith("No bindings"))
+IndexError: list index out of range
+
+-------------------------------
+TESTS FAILED  
+-------------------------------
+TESTS SKIPPED 
+-------------------------------
